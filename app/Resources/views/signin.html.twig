@@ -1,0 +1,18 @@
+<html>
+<head>
+    <link rel="stylesheet" href="{{ asset('css/Style.css') }}" />
+</head>
+<body>
+<div class="mainDiv">
+    <p class="header">Sign In</p>
+    <form method="post" action="~/Home/Validate">
+        <p> Login </p>
+        <input required type="text" name="txtLogin" placeholder="Login....." />
+        <p> Password </p>
+        <input required type="password" name="txtPassword" placeholder="Password....." /><br /><br />
+        <input class="btn" name="btn" type="submit" value="Sign In" />
+    </form>
+</div>
+</body>
+</html>
+
