@@ -50,12 +50,7 @@ class UserController extends Controller
             $user->setCreatedOn(new \DateTime());
             $user->setIsActive(true);
 
-            //$file = $request->get("form")["picurl"];
-            //$fileName = $this->generateUniqueFileName().'.'.$file->guessExtension();
-
-
-
-            return new Response("afsd");
+            return new Response($user->getName());
         } else {
 
             $user = new User();

@@ -78,7 +78,7 @@ class LuckyController extends Controller
     public function getFile()
     {
         $path = $this->container->getParameter('kernel.root_dir');
-        $path = str_replace("/app", "", $path) . "/file.png";
+        $path = str_replace("/app", "", $path) . "/web/uploads/file.png";
         $file = new File($path);
         return $this->file($file, "my_file", ResponseHeaderBag::DISPOSITION_INLINE);
     }
