@@ -1,0 +1,271 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/Style.css') }}">
+    <style>
+        .divClass {
+            width: 300px;
+            border: 1px solid;
+            padding-Left: 40px;
+            padding-Top: 20px;
+            margin: 30px;
+            float: left;
+        }
+        .model{
+            border:1px solid;
+            padding:20px;
+            position:fixed;
+            background-color:white;
+        }
+        .comments {
+            visibility: hidden;
+            position: fixed;
+            overflow:auto;
+            background-color: white;
+            width: 300px;
+            height:400px;
+            border: 1px solid;
+            margin-top:0px;
+            margin-left:300px;
+            padding-left:20px;
+            padding-top:20px;
+        }
+        .img{
+            height:60px;
+            width:60px;
+        }
+        .left{
+            float:left;
+        }
+    </style>
+    <script>
+        var msg = {};
+        function popup(obj) {
+            document.getElementById("model").style.visibility = 'visible';
+            var pName = $(obj).prev().prev().prev().prev().prev().prev().prev().prev().prev().text();
+            pType = $(obj).prev().prev().prev().prev().prev().prev().prev().prev().text();
+            pPrice = $(obj).prev().prev().prev().prev().prev().prev().prev().text();
+            pDescription = $(obj).prev().prev().prev().prev().prev().prev().text();
+            msg = { "Name": pName, "Type": pType, "Price": pPrice, "Description": pDescription };
+
+        }
+        function sendEmail() {
+            msg.Email = document.getElementById("txtEmail").value;
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/User/SendEmail")',
+                data: msg,
+                success: successMail,
+                error: errorMail
+            };
+            $.ajax(setting);
+            return false;
+        }
+        function hide() {
+            document.getElementById("model").style.visibility = 'hidden';
+        }
+        function addToFavorite(pId) {
+            var d = {"pId":pId};
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/User/AddToFavorite")',
+                data: d,
+                success: function (r) { if (r.added == true) alert("Added to favorite");},
+                error: function (){alert("Error")}
+            };
+            $.ajax(setting);
+        }
+        function close1() {
+            document.getElementById("comments").style.visibility = 'hidden';
+        }
+        function deleteFunc(str, s) {
+            var values = { "id": str };
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/DeleteProduct")',
+                data: values,
+                success: successFunction,
+                error: errorFunction
+            };
+            $.ajax(setting);
+            $(s).parent().remove();
+            return false;
+        }
+        function editFunc(str, s) {
+
+            theForm = document.createElement('form');
+            theForm.action = '@Url.Content("~/EditProduct")';
+            theForm.method = 'post';
+            newInput1 = document.createElement('input');
+            newInput1.type = 'hidden';
+            newInput1.name = 'id';
+            newInput1.value = str;
+
+            theForm.appendChild(newInput1);
+            document.getElementById('hidden_form_container').appendChild(theForm);
+            theForm.submit();
+        }
+        function postComment(obj, productId, userId) {
+            var commentStr = $(obj).prev().prev().prev().val();
+            if ($(obj).prev().prev().prev().val().length <= 1) {
+                alert("Enter comment");
+            }
+            else {
+                var comment = { "productId": productId, "userId": userId, "commentStr": commentStr };
+                var setting = {
+                    type: "POST",
+                    dataType: "json",
+                    url: '@Url.Content("~/PostComment")',
+                    data: comment,
+                    success: function (r) {
+                        var div = $("<div></div>");
+                        $(div).append('<img src="' + r.posted.UserPic + '" height="60" width="60"/>');
+                        $(div).append("<h3>" + r.posted.UserName + "</h3>");
+                        $(div).append("<p>" + r.posted.CommentString + "</p><br />");
+                        if ($(obj).next().next().next().val() == "Load more comments" || $(obj).next().next().next().next().val() == "Load more comments") {
+                            $(obj).next().next().after(div);
+                        }
+                        else {
+                            $(obj).next().next().next().next().remove();
+                            $(obj).next().next().after(div);
+                        }
+                    },
+                    error: function () { alert("Error in posting comment");}
+                };
+                $.ajax(setting);
+            }
+        }
+        function showAllComments(productId) {
+            var product = { "productId": productId };
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/User/GetProductAllComments")',
+                data: product,
+                success: successShow,
+                error: errorShow
+            };
+            $.ajax(setting);
+        }
+        function search() {
+            var str = { "searchStr": $("#txtSearch").text() };
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/Search")',
+                data: str,
+                success: function () {},
+                error: function () { alert("Error");}
+            };
+            $.ajax(setting);
+        }
+        function rateProduct(productId, rateNo, obj) {
+            var str = { "productId" :productId, "rateNo":rateNo};
+            var setting = {
+                type: "POST",
+                dataType: "json",
+                url: '@Url.Content("~/RateProduct")',
+                data: str,
+                success: function (r) {
+                    $(obj).parent().prev().prev().text(r.rated);
+                },
+                error: function () { alert("Error in ratting"); }
+            };
+            $.ajax(setting);
+        }
+        function successShow(productComments) {
+            var commentsDiv = $("#comments");
+            $("#comments #del").remove();
+            for (var i = 0; i < productComments.comment.length; i++) {
+                commentsDiv.append("<img id='del' class='img' src='" + productComments.comment[i].UserPic + "' />");
+                commentsDiv.append("<div class='' id='del'>   <h5>" + productComments.comment[i].UserName + " </h5> <p> " + productComments.comment[i].CommentString + " </p></div>");
+                commentsDiv.append("<p id='del'>___________________________________</p>");
+            }
+            document.getElementById("comments").style.visibility = "visible";
+        }
+        function errorShow() {
+            alert("an error occured");
+        }
+        function successFunction(r) {
+            if (r.deleted == true) {
+                alert("Product deleted");
+            }
+            else {
+                alert("Product could not be deleted");
+            }
+        }
+        function errorFunction() {
+            alert("error");
+        }
+        function successMail(r) {
+            if (r.sent == true) {
+                alert("Email sent successfully");
+            }
+            else {
+                alert("Email could not be sent");
+            }
+        }
+        function errorMail() {
+            alert("error");
+        }
+    </script>
+</head>
+<body>
+<form method="get" action="/Search">
+    <input type="text" name="txtSearch" />
+    <input type="submit" value="Search" />
+</form>
+{% for product in products %}
+        <div class='divClass'>
+            <img height='200' width='200' src="{{ asset('web/uploads') ~ '/' ~ product.getPicURL()}}" />
+            <p> {{ product.getName() }}</p>
+            <p>Type: {{  product.getTypeId()}} </p>
+            <p> Price: {{ product.getPrice() }}</p>
+            <p>Description: {{ product.getDescription() }}</p>
+            <p>Updated By: {{ product.getUpdatedBy }}</p>
+            <p>Updated On: {{product.getUpdatedOn().format('y:m:d:h:min:s')}}</p>
+            {#<input onclick="addToFavorite(@p.ProductId)" type="button" value="Add To Favorite" /><br /><br /><br />#}
+            {#<input type='button' value='Delete' onclick='deleteFunc(@p.ProductId, this)' />#}
+            {#<input type='button' value='Edit' onclick='editFunc(@p.ProductId, this)' />#}
+            {#<br /><br />#}
+            {#}#}
+            {#else#}
+            {#{#}
+            {#<br /><br /><br />#}
+            {#}#}
+            {#}#}
+            {#else if (user == "User")#}
+            {#{#}
+            {#<p>Ratting</p>#}
+            {#<p>@BAL.Operations.GetRating(p.ProductId.ToString())</p>#}
+            {#<p style="font-size:25px">Rate this</p>#}
+            {#<div id="buttons">#}
+                {#<input type="button" value="0" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+                {#<input type="button" value="1" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+                {#<input type="button" value="2" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+                {#<input type="button" value="3" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+                {#<input type="button" value="4" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+                {#<input type="button" value="5" onclick="rateProduct(@p.ProductId, this.value, this)" />#}
+            {#</div> <br />#}
+            {#<input onclick="popup(this)" type="button" value="Email To Friend" /><br /><br />#}
+            {#<input onclick="addToFavorite(@p.ProductId)" type="button" value="Add To Favorite" /><br /><br /><br />#}
+            {#<textarea> </textarea><br /><br />#}
+            {#<input onclick="postComment(this, @p.ProductId, @Session["userId"])" type="button" value="Comment" /><br /><br />#}
+            {#comments = BAL.Operations.Get2CommentsOfProduct(p.ProductId.ToString());#}
+            {#foreach(Model.PostedComment com in comments)#}
+            {#{#}
+            {#string imageURL=BAL.Operations.GetUserPicURL(com.UserId);#}
+            {#string userName=BAL.Operations.GetUserName(com.UserId.ToString());#}
+            {#<div>#}
+                {#<img src="@Url.Content("~/images/"+imageURL)" height="60" width="60"/>#}
+                {#<h3>@userName</h3>#}
+                {#<p>@com.CommentString</p><br />#}
+            {#</div>#}
+            {#<input onclick="showAllComments(@p.ProductId)" type="button" value="Load more comments"/><br /><br />#}
+        </div>
+
+{% endfor %}
+</body>
+</html>

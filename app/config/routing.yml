@@ -1,7 +1,10 @@
 app:
     resource: '@AppBundle/Controller/'
     type: annotation
-    #prefix:   /admin
+app_product:
+    resource: '@AppBundle/Controller/ProductController.php'
+    type: annotation
+    prefix: '/product'
 url:
     path:     /lucky/url
     defaults: { _controller: AppBundle:Lucky:getURL }
