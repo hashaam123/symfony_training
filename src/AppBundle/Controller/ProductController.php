@@ -58,7 +58,7 @@ class ProductController extends Controller
             $product = new Product();
             $form = $this->createFormBuilder($product)
                 ->add('name', TextType::class)
-                ->add('price', NumberType::class, array('attr' => array('id' => 'someid')))
+                ->add('price', NumberType::class)
                 ->add("typeid", IntegerType::class)
                 ->add("description", TextType::class)
                 ->add("picurl", FileType::class)
@@ -71,6 +71,109 @@ class ProductController extends Controller
             ));
 
 
+        }
+    }
+
+
+    /**
+     * @route("/get", name="getproducts")
+     */
+    public function getProducts()
+    {
+        $product = $this->getDoctrine()
+            ->getRepository(Product::class)->findAll();
+
+        if (!$product) {
+            throw $this->createNotFoundException(
+                'No product found for id '
+            );
+        } else {
+            return $this->render("products.html.twig", array('products' => $product));
+        }
+
+    }
+
+    /**
+     * @route("/update")
+     */
+    public function update(Request $request)
+    {
+        if($request->get("id")) {
+            $productId = $request->get("id");
+            $product = new Product();
+            $product->setName($request->get("form")["name"]);
+            $product->setDescription($request->get("form")["description"]);
+            $product->setPrice($request->get("form")["price"]);
+            $product->setTypeId($request->get("form")["typeid"]);
+            $product->setUpdatedOn(new \DateTime);
+            $product->setUpdatedBy(11);
+            $product->setIsActive(true);
+
+            $file = $request->files->get("form")["picurl"];
+            $fileName = md5(uniqid()) . "." . $file->guessExtension();
+            $file->move($this->getParameter('uploads_directory'), $fileName);
+            unlink($this->getParameter('uploads_directory'), $product->getPicURL());
+            $product->setPicURL($fileName);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $prod = $entityManager->getRepository(Product::class)->find($productId);
+            if(!$prod) {
+                throw $this->createNotFoundException("product not found");
+            } else {
+                if($product->getName()) {
+                    $prod->setName($product->getName());
+                }
+                if($product->getPicURL()) {
+                    $prod->setPicURL($product->getPicURL());
+                }
+                if($product->getDescription()) {
+                    $prod->setDescription($product->getDescription());
+                }
+                if($product->getPrice()) {
+                    $prod->setPrice($product->getPrice());
+                }
+                if($product->getTypeId()) {
+                    $prod->setTypeId($productId);
+                }
+                if($product->getUpdatedBy()) {
+                    $prod->setUpdatedBy($product->getUpdatedBy());
+                }
+                if($product->getUpdatedOn()) {
+                    $prod->setUpdatedOn($product->getUpdatedOn());
+                }
+                $entityManager->flush();
+                return $this->redirectToRoute("getproducts");
+            }
+        } else {
+            $product = new Product();
+            $form = $this->createFormBuilder($product)
+                ->add('name', TextType::class)
+                ->add('price', NumberType::class)
+                ->add("typeid", IntegerType::class)
+                ->add("description", TextType::class)
+                ->add("picurl", FileType::class)
+                ->add('Submit', SubmitType::class, array('label' => 'Update Product'))
+                ->setMethod('post')
+                ->getForm();
+
+            return $this->render('edit_product.html.twig', array('form' => $form->createView()));
+        }
+    }
+
+    /**
+     * @route("/delete")
+     */
+    public function deleteProduct(Request $request)
+    {
+        $productId = $request->get("id");
+        if($productId) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $product = $entityManager->getRepository(Product::class)->find($productId);
+            $entityManager->remove($product);
+            $entityManager->flush();
+            return new Response(json_encode("true"));
+        } else {
+            return new Response(json_encode("false"));
         }
     }
 
