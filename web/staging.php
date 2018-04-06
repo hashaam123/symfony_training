@@ -7,7 +7,7 @@ if (PHP_VERSION_ID < 70000) {
     include_once __DIR__.'/../var/bootstrap.php.cache';
 }
 
-$kernel = new AppKernel('hash', false);
+$kernel = new AppKernel('staging', true);
 if (PHP_VERSION_ID < 70000) {
     $kernel->loadClassCache();
 }
