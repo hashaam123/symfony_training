@@ -5,6 +5,7 @@
     <script src="{{ asset('js/products.js') }}"></script>
 </head>
 <body>
+<h1>{{ app_name }}</h1>
 <form method="get" action="/Search">
     <input type="text" name="txtSearch" />
     <input type="submit" value="Search" />
@@ -13,15 +14,15 @@
     <div class="product-container">
         <img class="product-image" src="{{ asset('uploads') ~ '/' ~ product.getPicURL() }}"/>
         <p class="id" hidden>{{ product.getId() }}</p>
-        <p>{{ product.getName() }}</p>
-        <p>TypeId: {{ product.getTypeId() }}</p>
-        <p>Price: {{ product.getPrice() }}</p>
-        <p>Description: {{ product.getDescription() }}</p>
+        <p class="name">{{ product.getName() }}</p>
+        <p>TypeId: <span class="typeid">{{ product.getTypeId() }}</span></p>
+        <p>Price: <span class="price">{{ product.getPrice() }}</span></p>
+        <p>Description: <span class="description">{{ product.getDescription() }}</span></p>
         <p>Updated By: {{ product.getUpdatedBy }}</p>
         <p>Updated On: {{ product.getUpdatedOn().format('y:M:d:h:m:s') }}</p>
         <div>
             <button onclick="deleteProduct(this)">Delete</button>
-            <button>Edit</button>
+            <button onclick="editProduct(this)">Edit</button>
         </div>
     </div>
 {% endfor %}

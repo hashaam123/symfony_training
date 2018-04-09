@@ -17,16 +17,14 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-
-
 use AppBundle\Entity\User;
 use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+
 
 class ProductController extends Controller
 {
-    /**
-     * @route("/add", name="productadd")
-     */
     public function addProductAction(Request $request)
     {
         if($request->get("form")["name"]) {
@@ -42,7 +40,7 @@ class ProductController extends Controller
 
             $file = $request->files->get("form")["picurl"];
             $fileName = md5(uniqid()) . "." . $file->guessExtension();
-            $file->move($this->getParameter('uploads_directory'), $fileName);
+            $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
 
             $product->setPicURL($fileName);
 
@@ -74,11 +72,19 @@ class ProductController extends Controller
         }
     }
 
+    public function getProductAction($id)
+    {
+        if(isset($id)) {
+            $product = $this->getDoctrine()->getRepository(Product::class)->find($id);
+            if(isset($product)) {
+                $product = array($product);
+                return $this->render("products.html.twig", array('products' => $product));
+            }
+        }
+        throw $this->createNotFoundException("product not found");
+    }
 
-    /**
-     * @route("/get", name="getproducts")
-     */
-    public function getProducts()
+    public function getProductsAction()
     {
         $product = $this->getDoctrine()
             ->getRepository(Product::class)->findAll();
@@ -93,13 +99,10 @@ class ProductController extends Controller
 
     }
 
-    /**
-     * @route("/update")
-     */
-    public function update(Request $request)
+    public function updateProductAction(Request $request)
     {
-        if($request->get("id")) {
-            $productId = $request->get("id");
+        if($request->get("form")["id"]) {
+            $productId = $request->get("form")["id"];
             $product = new Product();
             $product->setName($request->get("form")["name"]);
             $product->setDescription($request->get("form")["description"]);
@@ -107,14 +110,13 @@ class ProductController extends Controller
             $product->setTypeId($request->get("form")["typeid"]);
             $product->setUpdatedOn(new \DateTime);
             $product->setUpdatedBy(11);
-            $product->setIsActive(true);
-
             $file = $request->files->get("form")["picurl"];
-            $fileName = md5(uniqid()) . "." . $file->guessExtension();
-            $file->move($this->getParameter('uploads_directory'), $fileName);
-            unlink($this->getParameter('uploads_directory'), $product->getPicURL());
-            $product->setPicURL($fileName);
-
+            if(isset($file)) {
+                $fileName = md5(uniqid()) . "." . $file->guessExtension();
+                $fileSystem = new FileSystem();
+                $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
+                $product->setPicURL($fileName);
+            }
             $entityManager = $this->getDoctrine()->getManager();
             $prod = $entityManager->getRepository(Product::class)->find($productId);
             if(!$prod) {
@@ -133,42 +135,55 @@ class ProductController extends Controller
                     $prod->setPrice($product->getPrice());
                 }
                 if($product->getTypeId()) {
-                    $prod->setTypeId($productId);
+                    $prod->setTypeId($product->getTypeId());
                 }
                 if($product->getUpdatedBy()) {
                     $prod->setUpdatedBy($product->getUpdatedBy());
                 }
-                if($product->getUpdatedOn()) {
-                    $prod->setUpdatedOn($product->getUpdatedOn());
-                }
+                $prod->setUpdatedOn($product->getUpdatedOn());
                 $entityManager->flush();
                 return $this->redirectToRoute("getproducts");
             }
         } else {
-            $product = new Product();
-            $form = $this->createFormBuilder($product)
-                ->add('name', TextType::class)
-                ->add('price', NumberType::class)
-                ->add("typeid", IntegerType::class)
-                ->add("description", TextType::class)
-                ->add("picurl", FileType::class)
-                ->add('Submit', SubmitType::class, array('label' => 'Update Product'))
-                ->setMethod('post')
-                ->getForm();
-
-            return $this->render('edit_product.html.twig', array('form' => $form->createView()));
+            throw $this->createNotFoundException("product not found");
         }
     }
 
-    /**
-     * @route("/delete")
-     */
-    public function deleteProduct(Request $request)
+    public function editProductAction(Request $request)
+    {
+
+        $productId = $request->get("id");
+        if(isset($productId)) {
+            $prod = $this->getDoctrine()->getRepository(Product::class)->find($productId);
+            if (isset($prod)) {
+                $product = new Product();
+                $form = $this->createFormBuilder($product)
+                    ->add('id', TextType::class, array('attr' => array('class' => 'id', 'value' => $productId)))
+                    ->add('name', TextType::class, array('attr' => array('class' => 'name', 'value' => $prod->getName())))
+                    ->add('price', NumberType::class, array('attr' => array('class' => 'price', 'value' => $prod->getPrice())))
+                    ->add("typeid", IntegerType::class, array('attr' => array('class' => 'typeid', 'value' => $prod->getTypeId())))
+                    ->add("description", TextType::class, array('attr' => array('class' => 'description', 'value' => $prod->getDescription())))
+                    ->add("picurl", FileType::class, array('attr' => array('class' => 'picURL')))
+                    ->add('Submit', SubmitType::class, array('label' => 'Edit Product'))
+                    ->setMethod('post')
+                    ->setAction('/product/update')
+                    ->getForm();
+
+                return $this->render('edit_product.html.twig', array('form' => $form->createView()));
+            }
+        }
+        throw $this->createNotFoundException("product not found");
+
+    }
+
+    public function deleteProductAction(Request $request)
     {
         $productId = $request->get("id");
-        if($productId) {
+        if(isset($productId)) {
             $entityManager = $this->getDoctrine()->getManager();
             $product = $entityManager->getRepository(Product::class)->find($productId);
+            $fileSystem = new FileSystem();
+            $fileSystem->remove($this->get('kernel')->getRootDir() . '/../web/uploads' . '/' . $product->getPicURL());
             $entityManager->remove($product);
             $entityManager->flush();
             return new Response(json_encode("true"));
@@ -176,6 +191,5 @@ class ProductController extends Controller
             return new Response(json_encode("false"));
         }
     }
-
 }
 

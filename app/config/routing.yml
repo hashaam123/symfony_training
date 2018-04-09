@@ -1,3 +1,7 @@
+product_routing_file:
+    # loads routes from the given routing file stored in some bundle
+    resource: 'product_routing.yml'
+    prefix: /product
 app:
     resource: '@AppBundle/Controller/'
     type: annotation
