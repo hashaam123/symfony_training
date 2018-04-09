@@ -1,26 +1,19 @@
 <html>
 <head>
-    <link rel="stylesheet" href="{{ asset('css/Style.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/Styles.css.twig') }}">
 </head>
 <body>
 <h1>{{ app_name }}</h1>
-{#<div class="mainDiv">#}
-    {#<p class="header">Sign Up</p>#}
-    {#<form method="post" action="~/Home/Create" enctype="multipart/form-data">#}
-        {#<p> Name </p>#}
-        {#<input required type="text" name="txtName" placeholder="Name....." />#}
-        {#<p> Password </p>#}
-        {#<input required type="password" name="txtPassword" placeholder="Password....." />#}
-        {#<p> Login </p>#}
-        {#<input required type="text" name="txtLogin" placeholder="Login....." /><br /><br />#}
-        {#<input type="file" name="file" /><br /><br />#}
-        {#<input class="btn" name="btn" type="submit" value="Sign Up" />#}
-    {#</form>#}
-{#</div>#}
-
-{{ form_start(form) }}
-{{ form_widget(form) }}
-{{ form_end(form) }}
+<article class="top-container">
+    <header class="container-header">
+        <h3>Sign Up</h3>
+    </header>
+    <section>
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        {{ form_end(form) }}
+    </section>
+</article>
 
 </body>
 </html>

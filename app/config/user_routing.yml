@@ -1,0 +1,9 @@
+home_user:
+    path:     /home
+    defaults: { _controller: AppBundle:User:home }
+signin_user:
+    path:     /signin
+    defaults: { _controller: AppBundle:User:signIn }
+signup_user:
+    path:     /signup
+    defaults: { _controller: AppBundle:User:signUp}

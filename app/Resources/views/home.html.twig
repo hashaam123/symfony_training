@@ -1,5 +1,37 @@
 <html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/home.css.twig') }}" />
+</head>
 <body>
-<h1>user home file</h1>
+
+    <nav>
+        <ul class="menu">
+            <li>
+                <a href="/user/home"> Home </a>
+            </li>
+
+            <li>
+                <a href="#">Welcome {{ login }}</a>
+            </li>
+
+            <li>
+                <a href="/product/add">Add Product</a>
+            </li>
+
+            <li>
+                <a href="Page3">Update Profile</a>
+            </li>
+
+            <li>
+                <a href="Page3">Logout</a>
+            </li>
+        </ul>
+    </nav>
+
+    {% include 'products.html.twig'
+        with {'products': products} %}
+
+
 </body>
 </html>
