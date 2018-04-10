@@ -48,7 +48,7 @@ class ProductController extends Controller
             $entityManager->persist($product);
             $entityManager->flush();
 
-            return $this->redirectToRoute("productadd");
+            return $this->redirectToRoute("add_product");
         } else {
 
 
@@ -142,7 +142,7 @@ class ProductController extends Controller
                 }
                 $prod->setUpdatedOn($product->getUpdatedOn());
                 $entityManager->flush();
-                return $this->redirectToRoute("getproducts");
+                return $this->redirectToRoute("get_products");
             }
         } else {
             throw $this->createNotFoundException("product not found");
