@@ -1,0 +1,21 @@
+home_user:
+    path:     /home
+    defaults: { _controller: AppBundle:User:home }
+signin_user:
+    path:     /signin
+    defaults: { _controller: AppBundle:User:signIn }
+    requirements:
+        _method: POST
+signup_user:
+    path:     /signup
+    defaults: { _controller: AppBundle:User:signUp}
+    requirements:
+        _method: POST
+logout_user:
+    path:     /logout
+    defaults: { _controller: AppBundle:User:logout}
+update_user:
+    path:     /update
+    defaults: { _controller: AppBundle:User:updateProfile}
+    requirements:
+        _method: POST

@@ -1,0 +1,18 @@
+add_product:
+        path:     /add
+        defaults: { _controller: AppBundle:Product:addProduct }
+test_product:
+        path:     /getproduct/{id}
+        defaults: { _controller: AppBundle:Product:getProduct }
+get_products:
+        path:     /getproducts
+        defaults: { _controller: AppBundle:Product:getProducts }
+update_product:
+        path:     /update
+        defaults: { _controller: AppBundle:Product:updateProduct }
+edit_product:
+        path:     /edit
+        defaults: { _controller: AppBundle:Product:editProduct }
+delete_product:
+        path:     /delete
+        defaults: { _controller: AppBundle:Product:deleteProduct }

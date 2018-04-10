@@ -1,5 +1,16 @@
 <html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/home.css.twig') }}" />
+</head>
 <body>
-<h1>user home file</h1>
+
+    {% include 'menu.html.twig'
+        with {'user': user}%}
+
+    {% include 'products.html.twig'
+        with {'products': products} %}
+
+
 </body>
 </html>

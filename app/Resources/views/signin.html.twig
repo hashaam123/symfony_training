@@ -1,18 +1,19 @@
 <html>
 <head>
-    <link rel="stylesheet" href="{{ asset('css/Style.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/Styles.css.twig') }}">
 </head>
 <body>
-<div class="mainDiv">
-    <p class="header">Sign In</p>
-    <form method="post" action="~/Home/Validate">
-        <p> Login </p>
-        <input required type="text" name="txtLogin" placeholder="Login....." />
-        <p> Password </p>
-        <input required type="password" name="txtPassword" placeholder="Password....." /><br /><br />
-        <input class="btn" name="btn" type="submit" value="Sign In" />
-    </form>
-</div>
+<h1>{{ app_name }}</h1>
+<article class="top-container">
+    <header class="container-header">
+        <h3>Sign In</h3>
+    </header>
+    <section>
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        {{ form_end(form) }}
+    </section>
+</article>
+
 </body>
 </html>
-
