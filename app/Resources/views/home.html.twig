@@ -5,29 +5,8 @@
 </head>
 <body>
 
-    <nav>
-        <ul class="menu">
-            <li>
-                <a href="/user/home"> Home </a>
-            </li>
-
-            <li>
-                <a href="#">Welcome {{ login }}</a>
-            </li>
-
-            <li>
-                <a href="/product/add">Add Product</a>
-            </li>
-
-            <li>
-                <a href="Page3">Update Profile</a>
-            </li>
-
-            <li>
-                <a href="Page3">Logout</a>
-            </li>
-        </ul>
-    </nav>
+    {% include 'menu.html.twig'
+        with {'user': user}%}
 
     {% include 'products.html.twig'
         with {'products': products} %}

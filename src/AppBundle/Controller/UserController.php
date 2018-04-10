@@ -14,6 +14,9 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use AppBundle\Service\SessionManager;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
 
 use AppBundle\Entity\User;
@@ -22,12 +25,23 @@ use AppBundle\Entity\Product;
 
 class UserController extends Controller
 {
+    private $sessionManager;
+
+    public function __construct(SessionManager $sessionManager)
+    {
+        $this->sessionManager = $sessionManager;
+    }
 
     public function homeAction(Request $request)
     {
-        $login = $request->get("login");
-        $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
-        return $this->render("home.html.twig", array("login" => $login, "products" => $products));
+        if($this->sessionManager->isValid()) {
+            $login = $request->get("login");
+            $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
+            $user = $this->sessionManager->getUser();
+            return $this->render("home.html.twig", array("user" => $user, "products" => $products));
+        } else {
+            return $this->redirectToRoute("signin_user");
+        }
     }
 
     public function signInAction(Request $request)
@@ -37,6 +51,7 @@ class UserController extends Controller
             $password = $request->get("form")["password"];
             $user = $this->getDoctrine()->getRepository(User::class)->findOneByLogin($login);
             if(isset($user) && $user->getPassword() == $password) {
+                $this->sessionManager->startSession($user);
                 return $this->redirectToRoute("home_user", array("login" => $login));
             }
             throw $this->createNotFoundException("user does not exist");
@@ -50,7 +65,7 @@ class UserController extends Controller
                 ->add('Submit', SubmitType::class, array('label' => 'Sign In'))
                 ->getForm();
 
-            return $this->render('signup.html.twig', array(
+            return $this->render('signin.html.twig', array(
                 'form' => $form->createView(),
             ));
         }
@@ -78,6 +93,8 @@ class UserController extends Controller
             } catch (Throwable $t) {
                 throw $this->createNotFoundException("record could not be inserted");
             }
+            $user = $this->getDoctrine()->getRepository(User::class)->findOneByLogin($login);
+            $this->sessionManager->startSession($user);
             return $this->redirectToRoute("home_user");
         } else {
 
@@ -97,6 +114,56 @@ class UserController extends Controller
         }
     }
 
+    public function updateProfileAction(Request $request)
+    {
+        if ($this->sessionManager->isValid()) {
+            $user = $this->sessionManager->getUser();
+            $form = $this->createFormBuilder(new User())
+                ->add('login', TextType::class, array('attr' => array('value' => $user->getLogin())))
+                ->add('name', TextType::class, array('attr' => array('value' => $user->getName())))
+                ->add("password", PasswordType::class, array('attr' => array('value' => $user->getPassword())))
+                ->add("picurl", FileType::class)
+                ->add('Submit', SubmitType::class, array('label' => 'Sign Up'))
+                ->setMethod('post')
+                ->getForm();
+            if ($request->get("form")["login"]) {
+                $entityManager = $this->getDoctrine()->getManager();
+                $user = new User();
+                $user->setLogin($request->get("form")["login"]);
+                $user->setName($request->get("form")["name"]);
+                $user->setPassword($request->get("form")["password"]);
 
+                $file = $request->files->get("form")["picurl"];
+                if (isset($file)) {
+                    $fileName = md5(uniqid()) . "." . $file->guessExtension();
+                    $user->setPicURL($fileName);
+                    $user->setPicURL($fileName);
+                    $previousFile = $entityManager->getRepository(User::class)->findOneByLogin($this->sessionManager->getLogin())->getPicURL();
+                    $u = $entityManager->getRepository(User::class)->findOneByLogin($user->getLogin());
+                    $u->setName($user->getName());
+                    $u->setPassword($user->getPassword());
+                    $u->setPicURL($user->getPicURL());
+                    $entityManager->flush();
+                    $this->sessionManager->setUset($u);
+                    $fileSystem = new FileSystem();
+                    $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
+                    $fileSystem->remove($this->get('kernel')->getRootDir() . '/../web/uploads/' . $previousFile);
+                    return $this->redirectToRoute("home_user");
+                }
+
+            }
+            return $this->render('update_profile.html.twig', array(
+                'form' => $form->createView(),
+            ));
+
+        }
+        return $this->redirectToRoute("signin_user");
+    }
+
+    public function logoutAction()
+    {
+        $this->sessionManager->destroy();
+        return $this->redirectToRoute("signin_user");
+    }
 }
 

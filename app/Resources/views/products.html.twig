@@ -6,10 +6,6 @@
 </head>
 <body>
 <h1>{{ app_name }}</h1>
-<form method="get" action="/Search">
-    <input type="text" name="txtSearch" />
-    <input type="submit" value="Search" />
-</form>
 {% for product in products %}
     <div class="product-container">
         <img class="product-image" src="{{ asset('uploads') ~ '/' ~ product.getPicURL() }}"/>
