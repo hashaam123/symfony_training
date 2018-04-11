@@ -17,7 +17,9 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use AppBundle\Service\SessionManager;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-
+use AppBundle\Service\UserBAL;
+use AppBundle\Service\ProductBAL;
+use AppBundle\Form\UserType;
 
 use AppBundle\Entity\User;
 use AppBundle\Entity\Product;
@@ -26,17 +28,20 @@ use AppBundle\Entity\Product;
 class UserController extends Controller
 {
     private $sessionManager;
+    private $userBAL;
+    private $productBAL;
 
-    public function __construct(SessionManager $sessionManager)
+    public function __construct(SessionManager $sessionManager, UserBAL $userBAL, ProductBAL $productBAL)
     {
         $this->sessionManager = $sessionManager;
+        $this->userBAL = $userBAL;
+        $this->productBAL = $productBAL;
     }
 
     public function homeAction(Request $request)
     {
         if($this->sessionManager->isValid()) {
-            $login = $request->get("login");
-            $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
+            $products = $this->productBAL->getAllProducts();
             $user = $this->sessionManager->getUser();
             return $this->render("home.html.twig", array("user" => $user, "products" => $products));
         } else {
@@ -46,25 +51,18 @@ class UserController extends Controller
 
     public function signInAction(Request $request)
     {
-        if(isset($request->get("form")["login"])) {
-            $login = $request->get("form")["login"];
-            $password = $request->get("form")["password"];
-            $user = $this->getDoctrine()->getRepository(User::class)->findOneByLogin($login);
-            if(isset($user) && $user->getPassword() == $password) {
+        $form = $this->createForm(UserType::class, new User(), array('type' => 'signin'));
+        $form->handleRequest($request);
+
+        if($form->isSubmitted()) {
+            $u = $form->getData();
+            $user = $this->userBAL->getUserByLogin($u->getLogin());
+            if(!empty($user) && $user->getPassword() == $u->getPassword()) {
                 $this->sessionManager->startSession($user);
-                return $this->redirectToRoute("home_user", array("login" => $login));
+                return $this->redirectToRoute("home_user", array("login" => $u->getName()));
             }
             throw $this->createNotFoundException("user does not exist");
         } else {
-
-            $user = new User();
-            $form = $this->createFormBuilder($user)
-                ->add('login', TextType::class)
-                ->add("password", PasswordType::class)
-                ->setMethod('post')
-                ->add('Submit', SubmitType::class, array('label' => 'Sign In'))
-                ->getForm();
-
             return $this->render('signin.html.twig', array(
                 'form' => $form->createView(),
             ));
@@ -73,41 +71,19 @@ class UserController extends Controller
 
     public function signUpAction(Request $request)
     {
-        if(isset($request->get("form")["name"])) {
-            $user = new User();
-            $user->setName($request->get("form")["name"]);
-            $user->setLogin($request->get("form")["login"]);
-            $user->setPassword($request->get("form")["password"]);
-            $user->setCreatedOn(new \DateTime());
-            $user->setIsActive(true);
-            $user->setIsAdmin(false);
-
-            $file = $request->files->get("form")["picurl"];
-            $fileName = md5(uniqid()) . "." . $file->guessExtension();
-            $user->setPicURL($fileName);
-            try {
-                $entityManger = $this->getDoctrine()->getManager();
-                $entityManger->persist($user);
-                $entityManger->flush();
-                $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
-            } catch (Throwable $t) {
+        $form = $this->createForm(UserType::class, null);
+        $form->handleRequest($request);
+        if($form->isSubmitted()) {
+            $user = $form->getData();
+            $user->setPicURL($form['picurl']->getData());
+            if($this->userBAL->addUser($user)) {
+                $user = $this->userBAL->getUserByLogin($user->getLogin());
+                $this->sessionManager->startSession($user);
+                return $this->redirectToRoute("home_user");
+            } else {
                 throw $this->createNotFoundException("record could not be inserted");
             }
-            $user = $this->getDoctrine()->getRepository(User::class)->findOneByLogin($login);
-            $this->sessionManager->startSession($user);
-            return $this->redirectToRoute("home_user");
         } else {
-
-            $user = new User();
-            $form = $this->createFormBuilder($user)
-                ->add('login', TextType::class)
-                ->add('name', TextType::class, array('attr' => array('id' => 'someid')))
-                ->add("password", PasswordType::class)
-                ->add("picurl", FileType::class)
-                ->add('Submit', SubmitType::class, array('label' => 'Sign Up'))
-                ->setMethod('post')
-                ->getForm();
-
             return $this->render('signup.html.twig', array(
                 'form' => $form->createView(),
             ));
@@ -117,47 +93,23 @@ class UserController extends Controller
     public function updateProfileAction(Request $request)
     {
         if ($this->sessionManager->isValid()) {
-            $user = $this->sessionManager->getUser();
-            $form = $this->createFormBuilder(new User())
-                ->add('login', TextType::class, array('attr' => array('value' => $user->getLogin())))
-                ->add('name', TextType::class, array('attr' => array('value' => $user->getName())))
-                ->add("password", PasswordType::class, array('attr' => array('value' => $user->getPassword())))
-                ->add("picurl", FileType::class)
-                ->add('Submit', SubmitType::class, array('label' => 'Sign Up'))
-                ->setMethod('post')
-                ->getForm();
-            if ($request->get("form")["login"]) {
-                $entityManager = $this->getDoctrine()->getManager();
-                $user = new User();
-                $user->setLogin($request->get("form")["login"]);
-                $user->setName($request->get("form")["name"]);
-                $user->setPassword($request->get("form")["password"]);
-
-                $file = $request->files->get("form")["picurl"];
-                if (isset($file)) {
-                    $fileName = md5(uniqid()) . "." . $file->guessExtension();
-                    $user->setPicURL($fileName);
-                    $user->setPicURL($fileName);
-                    $previousFile = $entityManager->getRepository(User::class)->findOneByLogin($this->sessionManager->getLogin())->getPicURL();
-                    $u = $entityManager->getRepository(User::class)->findOneByLogin($user->getLogin());
-                    $u->setName($user->getName());
-                    $u->setPassword($user->getPassword());
-                    $u->setPicURL($user->getPicURL());
-                    $entityManager->flush();
-                    $this->sessionManager->setUset($u);
-                    $fileSystem = new FileSystem();
-                    $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
-                    $fileSystem->remove($this->get('kernel')->getRootDir() . '/../web/uploads/' . $previousFile);
-                    return $this->redirectToRoute("home_user");
-                }
-
+            $user = $this->userBAL->getUser($this->sessionManager->getUser());
+            $form = $this->createForm(UserType::class, $user);
+            $form->handleRequest($request);
+            if ($form->isSubmitted()) {
+                $updatedUser = $form->getData();
+                $updatedUser->setPicURL($form['picurl']->getData());
+                $this->userBAL->updateUser($updatedUser);
+                return $this->redirectToRoute("home_user");
+            } else {
+                return $this->render('update_profile.html.twig', array(
+                    'form' => $form->createView(),
+                ));
             }
-            return $this->render('update_profile.html.twig', array(
-                'form' => $form->createView(),
-            ));
 
+        } else {
+            return $this->redirectToRoute("signin_user");
         }
-        return $this->redirectToRoute("signin_user");
     }
 
     public function logoutAction()

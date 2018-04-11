@@ -37,6 +37,10 @@ services:
     AppBundle\Service\ProductDAL:
         arguments: ['@doctrine.orm.entity_manager']
 
+    AppBundle\Service\UserDAL:
+        arguments: ['@doctrine.orm.entity_manager']
+
+
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
     #     arguments:

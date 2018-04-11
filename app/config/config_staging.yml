@@ -7,6 +7,10 @@ imports:
 #        result_cache_driver: apc
 #        query_cache_driver: apc
 
+twig:
+    globals:
+        app_name: '%app_name% staging environment'
+
 monolog:
     handlers:
         main:

@@ -3,7 +3,6 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\Product;
-use Symfony\Component\HttpFoundation\File\File;
 
 class ProductBAL
 {

@@ -35,7 +35,7 @@ framework:
 # Twig Configuration
 twig:
     globals:
-        app_name: "Product Management System"
+        app_name: '%app_name%'
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
 

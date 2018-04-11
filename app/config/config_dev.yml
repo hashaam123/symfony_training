@@ -11,6 +11,10 @@ web_profiler:
     toolbar: true
     intercept_redirects: false
 
+twig:
+    globals:
+        app_name: '%app_name% development environment'
+
 monolog:
     handlers:
         main:
