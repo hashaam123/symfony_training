@@ -21,61 +21,35 @@ use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use AppBundle\Service\SessionManager;
-
+use AppBundle\Service\ProductBAL;
+use AppBundle\Form\ProductType;
 
 
 class ProductController extends Controller
 {
     private $sessionManager;
+    private $productBAL;
 
-    public function __construct(SessionManager $sessionManager)
+    public function __construct(SessionManager $sessionManager, ProductBAL $productBAL)
     {
         $this->sessionManager = $sessionManager;
+        $this->productBAL = $productBAL;
     }
 
     public function addProductAction(Request $request)
     {
         if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
-            if ($request->get("form")["name"]) {
-                $product = new Product();
-                $product->setName($request->get("form")["name"]);
-                $product->setDescription($request->get("form")["description"]);
-                $product->setPrice($request->get("form")["price"]);
-                $product->setTypeId($request->get("form")["typeid"]);
-                $product->setUpdatedOn(new \DateTime);
-                $product->setUpdatedBy($this->sessionManager->getId());
-                $product->setIsActive(true);
-
-                $file = $request->files->get("form")["picurl"];
-                $fileName = md5(uniqid()) . "." . $file->guessExtension();
-                $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
-
-                $product->setPicURL($fileName);
-
-                $entityManager = $this->getDoctrine()->getManager();
-                $entityManager->persist($product);
-                $entityManager->flush();
-
-                return $this->redirectToRoute("add_product");
+            $form = $this->createForm(ProductType::class, new Product());
+            $form->handleRequest($request);
+            if ($form->isSubmitted()) {
+                $product = $form->getData();
+                $product->setPicURL($form['picurl']->getData());
+                $this->productBAL->addProduct($product);
+                return $this->redirectToRoute("home_user");
             } else {
-
-
-                $product = new Product();
-                $form = $this->createFormBuilder($product)
-                    ->add('name', TextType::class)
-                    ->add('price', NumberType::class)
-                    ->add("typeid", IntegerType::class)
-                    ->add("description", TextType::class)
-                    ->add("picurl", FileType::class)
-                    ->add('Submit', SubmitType::class, array('label' => 'Add Product'))
-                    ->setMethod('post')
-                    ->getForm();
-
                 return $this->render('addproduct.html.twig', array(
                     'form' => $form->createView(),
                 ));
-
-
             }
         } else {
             return $this->redirectToRoute("signin_user");
@@ -86,13 +60,14 @@ class ProductController extends Controller
     {
         if ($this->sessionManager->isValid()) {
             if (isset($id)) {
-                $product = $this->getDoctrine()->getRepository(Product::class)->find($id);
-                if (isset($product)) {
+                $product = $this->productBAL->getProductById($id);
+                if (empty($product)) {
+                    throw $this->createNotFoundException("product not found");
+                } else {
                     $product = array($product);
                     return $this->render("products.html.twig", array('products' => $product));
                 }
             }
-            throw $this->createNotFoundException("product not found");
         } else {
             return $this->redirectToRoute("signin_user");
         }
@@ -101,15 +76,14 @@ class ProductController extends Controller
     public function getProductsAction()
     {
         if ($this->sessionManager->isValid()) {
-            $product = $this->getDoctrine()
-                ->getRepository(Product::class)->findAll();
+            $products = $this->productBAL->getAllProducts();
 
-            if (!$product) {
+            if (empty($products)) {
                 throw $this->createNotFoundException(
                     'No product found for id '
                 );
             } else {
-                return $this->render("products.html.twig", array('products' => $product));
+                return $this->render("products.html.twig", array('products' => $products));
             }
         } else {
             return $this->redirectToRoute("signin_user");
@@ -120,83 +94,28 @@ class ProductController extends Controller
     public function updateProductAction(Request $request)
     {
         if($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
-            if ($request->get("form")["id"]) {
-                $productId = $request->get("form")["id"];
-                $product = new Product();
-                $product->setName($request->get("form")["name"]);
-                $product->setDescription($request->get("form")["description"]);
-                $product->setPrice($request->get("form")["price"]);
-                $product->setTypeId($request->get("form")["typeid"]);
-                $product->setUpdatedOn(new \DateTime);
-                $product->setUpdatedBy($this->sessionManager->getId());
-                $file = $request->files->get("form")["picurl"];
-                $entityManager = $this->getDoctrine()->getManager();
-                if (isset($file)) {
-                    $fileName = md5(uniqid()) . "." . $file->guessExtension();
-                    $fileSystem = new FileSystem();
-                    $file->move($this->get('kernel')->getRootDir() . '/../web/uploads', $fileName);
-                    $product->setPicURL($fileName);
-                    $previousFile = $entityManager->getRepository(Product::class)->findOneById($productId)->getPicURL();
-                    $fileSystem->remove($this->get('kernel')->getRootDir() . '/../web/uploads/' . $previousFile);
-                }
-                $prod = $entityManager->getRepository(Product::class)->find($productId);
-                if (!$prod) {
-                    throw $this->createNotFoundException("product not found");
-                } else {
-                    if ($product->getName()) {
-                        $prod->setName($product->getName());
-                    }
-                    if ($product->getPicURL()) {
-                        $prod->setPicURL($product->getPicURL());
-                    }
-                    if ($product->getDescription()) {
-                        $prod->setDescription($product->getDescription());
-                    }
-                    if ($product->getPrice()) {
-                        $prod->setPrice($product->getPrice());
-                    }
-                    if ($product->getTypeId()) {
-                        $prod->setTypeId($product->getTypeId());
-                    }
-                    if ($product->getUpdatedBy()) {
-                        $prod->setUpdatedBy($product->getUpdatedBy());
-                    }
-                    $prod->setUpdatedOn($product->getUpdatedOn());
-                    $entityManager->flush();
-                    return $this->redirectToRoute("get_products");
-                }
-            } else {
-                throw $this->createNotFoundException("product not found");
-            }
-        } else {
-            return $this->redirectToRoute("signin_user");
-        }
-    }
 
-    public function editProductAction(Request $request)
-    {
-        if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
             $productId = $request->get("id");
-            if (isset($productId)) {
-                $prod = $this->getDoctrine()->getRepository(Product::class)->find($productId);
-                if (isset($prod)) {
-                    $product = new Product();
-                    $form = $this->createFormBuilder($product)
-                        ->add('id', TextType::class, array('attr' => array('class' => 'id', 'value' => $productId)))
-                        ->add('name', TextType::class, array('attr' => array('class' => 'name', 'value' => $prod->getName())))
-                        ->add('price', NumberType::class, array('attr' => array('class' => 'price', 'value' => $prod->getPrice())))
-                        ->add("typeid", IntegerType::class, array('attr' => array('class' => 'typeid', 'value' => $prod->getTypeId())))
-                        ->add("description", TextType::class, array('attr' => array('class' => 'description', 'value' => $prod->getDescription())))
-                        ->add("picurl", FileType::class, array('attr' => array('class' => 'picURL')))
-                        ->add('Submit', SubmitType::class, array('label' => 'Edit Product'))
-                        ->setMethod('post')
-                        ->setAction('/product/update')
-                        ->getForm();
+            $prod = $this->productBAL->getProduct($this->productBAL->getProductById($productId));
+            $form = $this->createForm(ProductType::class, $prod);
+            $form->handleRequest($request);
 
-                    return $this->render('edit_product.html.twig', array('form' => $form->createView()));
-                }
+            if ($form->isSubmitted()) {
+
+                $productId = $_SESSION["id"];
+                $product = $form->getData();
+                $product->setPicURL($form['picurl']->getData());
+                $this->productBAL->updateProduct($product, $productId);
+                return $this->redirectToRoute("home_user");
+
+            } else {
+
+                $_SESSION["id"] = $productId;
+                return $this->render('edit_product.html.twig', array(
+                    'form' => $form->createView(),
+                ));
+
             }
-            throw $this->createNotFoundException("product not found");
         } else {
             return $this->redirectToRoute("signin_user");
         }
@@ -206,20 +125,24 @@ class ProductController extends Controller
     {
         if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
             $productId = $request->get("id");
-            if (isset($productId)) {
-                $entityManager = $this->getDoctrine()->getManager();
-                $product = $entityManager->getRepository(Product::class)->find($productId);
-                $fileSystem = new FileSystem();
-                $fileSystem->remove($this->get('kernel')->getRootDir() . '/../web/uploads/' . $product->getPicURL());
-                $entityManager->remove($product);
-                $entityManager->flush();
-                return new Response(json_encode("true"));
-            } else {
-                return new Response(json_encode("false"));
+            if (!empty($productId)) {
+                if ($this->productBAL->deleteProduct($productId)) {
+                    return new Response(json_encode("true"));
+                }
             }
+            return new Response(json_encode("false"));
         } else {
             return $this->redirectToRoute("signin_user");
         }
+    }
+
+    /**
+     * @route("/test")
+     */
+    public function test()
+    {
+        $str = '%kernel.root_dir%/../web/';
+        return new Response($str);
     }
 }
 
