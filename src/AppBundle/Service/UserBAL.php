@@ -3,18 +3,31 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\User;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserBAL
 {
     private $sessionManager;
     private $userDAL;
+    private $validator;
     private $rootDir;
 
-    public function __construct(UserDAL $userDAL, SessionManager $sessionManager)
+    public function __construct(UserDAL $userDAL, SessionManager $sessionManager, ValidatorInterface $validator)
     {
         $this->userDAL = $userDAL;
         $this->sessionManager = $sessionManager;
+        $this->validator = $validator;
         $this->rootDir = "/home/coeus/Desktop/Untitled Folder/symfony_training";
+    }
+
+    public function validateUser(User $user)
+    {
+        $errors = $this->validator->validate($user);
+        if (count($errors) > 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function addUser(User $user)
@@ -26,7 +39,8 @@ class UserBAL
         $fileName = md5(uniqid()) . "." . $file->guessExtension();
         $file->move($this->rootDir . '/web/uploads/', $fileName);
         $user->setPicURL($fileName);
-        if ($this->userDAL->addUser($user)) {
+        $status = $this->validateUser($user) && $this->userDAL->addUser($user);
+        if ($status == true) {
             return true;
         } else {
             return false;
@@ -48,7 +62,8 @@ class UserBAL
         $fileName = md5(uniqid()) . "." . $file->guessExtension();
         $file->move($this->rootDir . '/web/uploads/', $fileName);
         $user->setPicURL($fileName);
-        if ($this->userDAL->updateUser($user)) {
+        $status = $this->validateUser($user) && $this->userDAL->updateUser($user);
+        if ($status == true) {
             $this->sessionManager->setUset($user);
             return true;
         } else {

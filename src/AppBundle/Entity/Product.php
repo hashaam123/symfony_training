@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Product
@@ -25,6 +26,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="Name", type="string", length=50)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=50)
      */
     private $name;
 
@@ -32,6 +35,8 @@ class Product
      * @var int
      *
      * @ORM\Column(name="TypeId", type="integer")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="integer")
      */
     private $typeId;
 
@@ -39,6 +44,8 @@ class Product
      * @var float
      *
      * @ORM\Column(name="Price", type="float")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="float")
      */
     private $price;
 
@@ -46,6 +53,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="Description", type="string", length=500)
+     * @Assert\NotBlank()
+     * @Assert\Length(max=500)
      */
     private $description;
 
@@ -53,6 +62,8 @@ class Product
      * @var string
      *
      * @ORM\Column(name="PicURL", type="string", length=250)
+     * @Assert\NotBlank()
+     * @Assert\Length(max=250)
      */
     private $picURL;
 
@@ -60,6 +71,8 @@ class Product
      * @var \DateTime
      *
      * @ORM\Column(name="UpdatedOn", type="datetime")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="datetime")
      */
     private $updatedOn;
 
@@ -67,6 +80,8 @@ class Product
      * @var int
      *
      * @ORM\Column(name="UpdatedBy", type="integer")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="integer")
      */
     private $updatedBy;
 
@@ -74,6 +89,8 @@ class Product
      * @var bool
      *
      * @ORM\Column(name="IsActive", type="boolean")
+     * @Assert\NotBlank()
+     * @Assert\Type(type="boolean")
      */
     private $isActive;
 

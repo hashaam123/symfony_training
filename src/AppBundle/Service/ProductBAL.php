@@ -3,34 +3,44 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\Product;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductBAL
 {
     private $sessionManager;
     private $productDAL;
+    private $validator;
     private $rootDir;
 
-    public function __construct(ProductDAL $productDAL, SessionManager $sessionManager)
+    public function __construct(ProductDAL $productDAL, SessionManager $sessionManager, ValidatorInterface $validator)
     {
         $this->productDAL = $productDAL;
         $this->sessionManager = $sessionManager;
+        $this->validator = $validator;
         $this->rootDir = "/home/coeus/Desktop/Untitled Folder/symfony_training";
+    }
+
+    public function validateProduct(Product $product)
+    {
+        $errors = $this->validator->validate($product);
+        if (count($errors) > 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function addProduct(Product $product)
     {
         $product->setUpdatedOn(new \DateTime);
-        $product->setUpdatedBy($this->sessionManager->getId());
+        $product->setUpdatedBy((int)$this->sessionManager->getId());
         $product->setIsActive(true);
         $file = $product->getPicURL();
         $fileName = md5(uniqid()) . "." . $file->guessExtension();
         $file->move($this->rootDir . '/web/uploads/', $fileName);
         $product->setPicURL($fileName);
-        if($this->productDAL->addProduct($product)) {
-            return true;
-        } else {
-            return false;
-        }
+        $status = $this->validateProduct($product) && $this->productDAL->addProduct($product);
+        return $status;
     }
 
     public function getProductById($id)
@@ -46,17 +56,14 @@ class ProductBAL
     public function updateProduct(Product $product, $productId)
     {
         $product->setUpdatedOn(new \DateTime);
-        $product->setUpdatedBy($this->sessionManager->getId());
+        $product->setUpdatedBy((int)$this->sessionManager->getId());
         $product->setIsActive(true);
         $file = $product->getPicURL();
         $fileName = md5(uniqid()) . "." . $file->guessExtension();
         $file->move($this->rootDir . '/web/uploads/', $fileName);
         $product->setPicURL($fileName);
-        if ($this->productDAL->updateProduct($product, $productId)) {
-            return true;
-        } else {
-            return false;
-        }
+        $status = $this->validateProduct($product) && $this->productDAL->updateProduct($product, $productId);
+        return $status;
     }
 
     public function getProduct(Product $product)
@@ -75,14 +82,3 @@ class ProductBAL
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-

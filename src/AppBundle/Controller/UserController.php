@@ -81,7 +81,7 @@ class UserController extends Controller
                 $this->sessionManager->startSession($user);
                 return $this->redirectToRoute("home_user");
             } else {
-                throw $this->createNotFoundException("record could not be inserted");
+                throw $this->createNotFoundException("sign up failed");
             }
         } else {
             return $this->render('signup.html.twig', array(

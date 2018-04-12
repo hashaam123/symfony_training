@@ -24,7 +24,6 @@ use AppBundle\Service\SessionManager;
 use AppBundle\Service\ProductBAL;
 use AppBundle\Form\ProductType;
 
-
 class ProductController extends Controller
 {
     private $sessionManager;
@@ -44,8 +43,12 @@ class ProductController extends Controller
             if ($form->isSubmitted()) {
                 $product = $form->getData();
                 $product->setPicURL($form['picurl']->getData());
-                $this->productBAL->addProduct($product);
-                return $this->redirectToRoute("home_user");
+                $status = $this->productBAL->addProduct($product, $productId);
+                if ($status === true) {
+                    return $this->redirectToRoute("home_user");
+                } else {
+                    throw $this->createNotFoundException($status);
+                }
             } else {
                 return $this->render('addproduct.html.twig', array(
                     'form' => $form->createView(),
@@ -105,9 +108,8 @@ class ProductController extends Controller
                 $productId = $_SESSION["id"];
                 $product = $form->getData();
                 $product->setPicURL($form['picurl']->getData());
-                $this->productBAL->updateProduct($product, $productId);
+                $status = $this->productBAL->updateProduct($product, $productId);
                 return $this->redirectToRoute("home_user");
-
             } else {
 
                 $_SESSION["id"] = $productId;
@@ -141,7 +143,8 @@ class ProductController extends Controller
      */
     public function test()
     {
-        $str = '%kernel.root_dir%/../web/';
+        $str = $this->get("validator");
+        $str = get_class($str);
         return new Response($str);
     }
 }
