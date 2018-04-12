@@ -89,7 +89,6 @@ class Product
      * @var bool
      *
      * @ORM\Column(name="IsActive", type="boolean")
-     * @Assert\NotBlank()
      * @Assert\Type(type="boolean")
      */
     private $isActive;

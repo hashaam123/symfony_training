@@ -23,16 +23,19 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use AppBundle\Service\SessionManager;
 use AppBundle\Service\ProductBAL;
 use AppBundle\Form\ProductType;
+use Psr\Log\LoggerInterface;
 
 class ProductController extends Controller
 {
     private $sessionManager;
     private $productBAL;
+    private $logger;
 
-    public function __construct(SessionManager $sessionManager, ProductBAL $productBAL)
+    public function __construct(SessionManager $sessionManager, ProductBAL $productBAL, LoggerInterface $logger)
     {
         $this->sessionManager = $sessionManager;
         $this->productBAL = $productBAL;
+        $this->logger = $logger;
     }
 
     public function addProductAction(Request $request)
@@ -43,7 +46,7 @@ class ProductController extends Controller
             if ($form->isSubmitted()) {
                 $product = $form->getData();
                 $product->setPicURL($form['picurl']->getData());
-                $status = $this->productBAL->addProduct($product, $productId);
+                $status = $this->productBAL->addProduct($product);
                 if ($status === true) {
                     return $this->redirectToRoute("home_user");
                 } else {
@@ -143,7 +146,7 @@ class ProductController extends Controller
      */
     public function test()
     {
-        $str = $this->get("validator");
+        $str = $this->logger;
         $str = get_class($str);
         return new Response($str);
     }

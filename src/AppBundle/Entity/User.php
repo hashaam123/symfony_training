@@ -62,7 +62,6 @@ class User
      * @var bool
      *
      * @ORM\Column(name="IsActive", type="boolean")
-     * @Assert\NotBlank()
      * @Assert\Type(type="boolean")
      */
     private $isActive;
@@ -80,7 +79,6 @@ class User
      * @var bool
      *
      * @ORM\Column(name="IsAdmin", type="boolean")
-     * @Assert\NotBlank()
      * @Assert\Type(type="boolean")
      */
     private $isAdmin;

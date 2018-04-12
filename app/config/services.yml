@@ -40,6 +40,13 @@ services:
     AppBundle\Service\UserDAL:
         arguments: ['@doctrine.orm.entity_manager']
 
+    AppBundle\Service\ProductBAL:
+        tags:
+            - { name: monolog.logger, channel: productbal }
+
+    AppBundle\Service\UserBAL:
+        tags:
+            - { name: monolog.logger, channel: userbal }
 
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:
