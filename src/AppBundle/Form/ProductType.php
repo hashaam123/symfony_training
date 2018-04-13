@@ -12,9 +12,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use AppBundle\Entity\Product;
 
+/**
+ * Class ProductType
+ * @package AppBundle\Form
+ */
 class ProductType extends AbstractType
 {
+    /**
+     * @var string
+     */
+    const addProduct = "Add Product";
 
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array $options
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -23,10 +35,13 @@ class ProductType extends AbstractType
             ->add("typeid", IntegerType::class)
             ->add("description", TextType::class)
             ->add("picurl", FileType::class)
-            ->add('Submit', SubmitType::class, array('label' => 'Add Product'))
+            ->add('Submit', SubmitType::class, array('label' => self::addProduct))
             ->setMethod('post');
     }
 
+    /**
+     * @param OptionsResolver $resolver
+     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(

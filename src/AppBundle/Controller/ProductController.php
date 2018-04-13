@@ -21,23 +21,49 @@ use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use AppBundle\Service\SessionManager;
-use AppBundle\Service\ProductBAL;
+use AppBundle\Service\ProductService;
 use AppBundle\Form\ProductType;
-use Psr\Log\LoggerInterface;
 
+/**
+ * Class ProductController
+ * @package AppBundle\Controller
+ * @route("/product")
+ */
 class ProductController extends Controller
 {
-    private $sessionManager;
-    private $productBAL;
-    private $logger;
+    /**
+     * @var string
+     */
+    const productError = "Product error occured";
 
-    public function __construct(SessionManager $sessionManager, ProductBAL $productBAL, LoggerInterface $logger)
+    /**
+     * @var SessionManager
+     * @package AppBundle\Service
+     */
+    private $sessionManager;
+
+    /**
+     * @var ProductService
+     * @package AppBundle\Service
+     */
+    private $productService;
+
+    /**
+     * ProductController constructor.
+     * @param SessionManager $sessionManager
+     * @param ProductService $productService
+     */
+    public function __construct(SessionManager $sessionManager, ProductService $productService)
     {
         $this->sessionManager = $sessionManager;
-        $this->productBAL = $productBAL;
-        $this->logger = $logger;
+        $this->productService = $productService;
     }
 
+    /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @route("/add", name="add_product")
+     */
     public function addProductAction(Request $request)
     {
         if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
@@ -46,32 +72,37 @@ class ProductController extends Controller
             if ($form->isSubmitted()) {
                 $product = $form->getData();
                 $product->setPicURL($form['picurl']->getData());
-                $status = $this->productBAL->addProduct($product);
+                $status = $this->productService->addProduct($product);
                 if ($status === true) {
                     return $this->redirectToRoute("home_user");
                 } else {
-                    throw $this->createNotFoundException($status);
+                    throw $this->createNotFoundException($this->get('translator')->trans(self::productError));
                 }
             } else {
-                return $this->render('addproduct.html.twig', array(
+                return $this->render('addproduct.html.twig', [
                     'form' => $form->createView(),
-                ));
+                ]);
             }
         } else {
             return $this->redirectToRoute("signin_user");
         }
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @route("/getproduct/{id}", name="get_product")
+     */
     public function getProductAction($id)
     {
         if ($this->sessionManager->isValid()) {
             if (isset($id)) {
-                $product = $this->productBAL->getProductById($id);
+                $product = $this->productService->getProductById($id);
                 if (empty($product)) {
-                    throw $this->createNotFoundException("product not found");
+                    throw $this->createNotFoundException($this->get('translator')->trans(self::productError));
                 } else {
-                    $product = array($product);
-                    return $this->render("products.html.twig", array('products' => $product));
+                    $product = [$product];
+                    return $this->render("products.html.twig", ['products' => $product]);
                 }
             }
         } else {
@@ -79,17 +110,22 @@ class ProductController extends Controller
         }
     }
 
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @route("/getproducts", name="get_products")
+     */
     public function getProductsAction()
     {
         if ($this->sessionManager->isValid()) {
-            $products = $this->productBAL->getAllProducts();
+            $products = $this->productService->getAllProducts();
 
             if (empty($products)) {
                 throw $this->createNotFoundException(
-                    'No product found for id '
+                    $this->get('translator')->trans(self::productError)
                 );
             } else {
-                return $this->render("products.html.twig", array('products' => $products));
+                return $this->render("products.html.twig", ['products' => $products]);
             }
         } else {
             return $this->redirectToRoute("signin_user");
@@ -97,12 +133,17 @@ class ProductController extends Controller
 
     }
 
+    /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @route("/update", name="update_product")
+     */
     public function updateProductAction(Request $request)
     {
         if($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
 
             $productId = $request->get("id");
-            $prod = $this->productBAL->getProduct($this->productBAL->getProductById($productId));
+            $prod = $this->productService->getProduct($this->productService->getProductById($productId));
             $form = $this->createForm(ProductType::class, $prod);
             $form->handleRequest($request);
 
@@ -111,44 +152,38 @@ class ProductController extends Controller
                 $productId = $_SESSION["id"];
                 $product = $form->getData();
                 $product->setPicURL($form['picurl']->getData());
-                $status = $this->productBAL->updateProduct($product, $productId);
+                $status = $this->productService->updateProduct($product, $productId);
                 return $this->redirectToRoute("home_user");
             } else {
 
                 $_SESSION["id"] = $productId;
-                return $this->render('edit_product.html.twig', array(
+                return $this->render('edit_product.html.twig', [
                     'form' => $form->createView(),
-                ));
+                ]);
 
             }
-        } else {
-            return $this->redirectToRoute("signin_user");
-        }
-    }
-
-    public function deleteProductAction(Request $request)
-    {
-        if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
-            $productId = $request->get("id");
-            if (!empty($productId)) {
-                if ($this->productBAL->deleteProduct($productId)) {
-                    return new Response(json_encode("true"));
-                }
-            }
-            return new Response(json_encode("false"));
         } else {
             return $this->redirectToRoute("signin_user");
         }
     }
 
     /**
-     * @route("/test")
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @route("/delete", name="delete_product")
      */
-    public function test()
+    public function deleteProductAction(Request $request)
     {
-        $str = $this->logger;
-        $str = get_class($str);
-        return new Response($str);
+        if ($this->sessionManager->isValid() && $this->sessionManager->getIsAdmin()) {
+            $productId = $request->get("id");
+            if (!empty($productId)) {
+                if ($this->productService->deleteProduct($productId)) {
+                    return new Response("true");
+                }
+            }
+            return new Response("false");
+        } else {
+            return $this->redirectToRoute("signin_user");
+        }
     }
 }
-

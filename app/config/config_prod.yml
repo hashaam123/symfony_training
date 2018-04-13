@@ -9,4 +9,4 @@ imports:
 
 twig:
     globals:
-        app_name: '%app_name% production environment'
+        app_name: '%app_name%'

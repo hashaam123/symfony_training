@@ -13,7 +13,7 @@ web_profiler:
 
 twig:
     globals:
-        app_name: '%app_name% development environment'
+        app_name: '%app_name%'
 
         # uncomment to get logging in your browser
         # you may have to allow bigger header sizes in your Web server configuration

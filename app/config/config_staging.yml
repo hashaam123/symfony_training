@@ -9,5 +9,5 @@ imports:
 
 twig:
     globals:
-        app_name: '%app_name% staging environment'
+        app_name: '%app_name%'
 
