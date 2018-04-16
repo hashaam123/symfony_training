@@ -1,4 +1,5 @@
 imports:
+imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
     - { resource: services.yml }
@@ -10,7 +11,9 @@ parameters:
 
 framework:
     #esi: ~
-    #translator: { fallbacks: ['%locale%'] }
+    translator:
+        paths:
+            - '%kernel.project_dir%/app/Resources/translations'
     secret: '%secret%'
     router:
         resource: '%kernel.project_dir%/app/config/routing.yml'
@@ -34,7 +37,7 @@ framework:
 # Twig Configuration
 twig:
     globals:
-        app_name: "Product Management System"
+        app_name: '%app_name%'
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
 
@@ -67,3 +70,11 @@ swiftmailer:
     username: '%mailer_user%'
     password: '%mailer_password%'
     spool: { type: memory }
+
+monolog:
+    handlers:
+        main:
+            type: stream
+            path: '%kernel.logs_dir%/customlogs.log'
+            level: info
+            channels: ['productservice', 'userservice']

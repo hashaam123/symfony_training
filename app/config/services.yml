@@ -34,6 +34,15 @@ services:
         public: true
         tags: ['controller.service_arguments']
 
+    AppBundle\Service\ProductService:
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - { name: monolog.logger, channel: productservice }
+
+    AppBundle\Service\UserService:
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - { name: monolog.logger, channel: userservice }
 
     # add more services, or override services that need manual wiring
     # AppBundle\Service\ExampleService:

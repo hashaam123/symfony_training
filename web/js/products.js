@@ -16,7 +16,7 @@ function deleteProduct(obj) {
 
 function editProduct(obj) {
     var id = $(obj).parent().parent().find(".id").text();
-    window.location = "/product/edit?id="+id;
+    window.location = "/product/update?id="+id;
 }
 
 function updateProduct(obj) {

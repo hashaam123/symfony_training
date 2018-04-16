@@ -1,9 +1,3 @@
-product_routing_file:
-    resource: 'product_routing.yml'
-    prefix: /product
-user_routing_file:
-    resource: 'user_routing.yml'
-    prefix: /user
 app:
     resource: '@AppBundle/Controller/'
     type: annotation

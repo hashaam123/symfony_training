@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User
@@ -25,6 +26,8 @@ class User
      * @var string
      *
      * @ORM\Column(name="Login", type="string", length=50, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=50)
      */
     private $login;
 
@@ -32,6 +35,8 @@ class User
      * @var string
      *
      * @ORM\Column(name="Name", type="string", length=50)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=50)
      */
     private $name;
 
@@ -39,6 +44,8 @@ class User
      * @var string
      *
      * @ORM\Column(name="Password", type="string", length=25)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=3, max=25)
      */
     private $password;
 
@@ -46,6 +53,8 @@ class User
      * @var \DateTime
      *
      * @ORM\Column(name="CreatedOn", type="datetime")
+     * @Assert\NotBlank()
+     * @Assert\DateTime()
      */
     private $createdOn;
 
@@ -53,6 +62,7 @@ class User
      * @var bool
      *
      * @ORM\Column(name="IsActive", type="boolean")
+     * @Assert\Type(type="boolean")
      */
     private $isActive;
 
@@ -60,6 +70,8 @@ class User
      * @var string
      *
      * @ORM\Column(name="PicURL", type="string", length=250)
+     * @Assert\NotBlank()
+     * @Assert\Length(max=250)
      */
     private $picURL;
 
@@ -67,6 +79,7 @@ class User
      * @var bool
      *
      * @ORM\Column(name="IsAdmin", type="boolean")
+     * @Assert\Type(type="boolean")
      */
     private $isAdmin;
 

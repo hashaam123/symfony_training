@@ -18,3 +18,4 @@
 /.gitignore
 /.idea
 /phpunit.xml.dist
+/web/uploads
