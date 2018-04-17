@@ -2,16 +2,23 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Product
+ * Customer
  *
- * @ORM\Table(name="product")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
+ * @ORM\Table(name="customer")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\CustomerRepository")
  */
-class Product
+class Customer
 {
+    /**
+     * @ORM\ManyToMany(targetEntity="Orders", inversedBy="customers")
+     * @ORM\JoinColumn(name="id", referencedColumnName="userId")
+     */
+    private $orders;
+
     /**
      * @var int
      *
@@ -29,12 +36,19 @@ class Product
     private $name;
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="Cost", type="float")
+     * @ORM\Column(name="Picture", type="string", length=255, nullable=true)
      */
-    private $cost;
+    private $picture;
 
+    /**
+     * Customer constructor.
+     */
+    public function __construct()
+    {
+        $this->orders = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -51,7 +65,7 @@ class Product
      *
      * @param string $name
      *
-     * @return Product
+     * @return Customer
      */
     public function setName($name)
     {
@@ -71,27 +85,27 @@ class Product
     }
 
     /**
-     * Set cost
+     * Set picture
      *
-     * @param float $cost
+     * @param string $picture
      *
-     * @return Product
+     * @return Customer
      */
-    public function setCost($cost)
+    public function setPicture($picture)
     {
-        $this->cost = $cost;
+        $this->picture = $picture;
 
         return $this;
     }
 
     /**
-     * Get cost
+     * Get picture
      *
-     * @return float
+     * @return string
      */
-    public function getCost()
+    public function getPicture()
     {
-        return $this->cost;
+        return $this->picture;
     }
 }
 

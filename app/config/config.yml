@@ -13,7 +13,7 @@ framework:
     #esi: ~
     translator:
         paths:
-            - '%kernel.project_dir%/app/Resources/translations'
+#            - '%kernel.project_dir%/app/Resources/translations'
     secret: '%secret%'
     router:
         resource: '%kernel.project_dir%/app/config/routing.yml'
@@ -71,10 +71,9 @@ swiftmailer:
     password: '%mailer_password%'
     spool: { type: memory }
 
-monolog:
-    handlers:
-        main:
-            type: stream
-            path: '%kernel.logs_dir%/customlogs.log'
-            level: info
-            channels: ['productservice', 'userservice']
+#monolog:
+#    handlers:
+#        main:
+#            type: stream
+#            path: '%kernel.logs_dir%/customlogs.log'
+#            level: info

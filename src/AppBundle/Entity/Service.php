@@ -5,12 +5,12 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Product
+ * Service
  *
- * @ORM\Table(name="product")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
+ * @ORM\Table(name="service")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\ServiceRepository")
  */
-class Product
+class Service
 {
     /**
      * @var int
@@ -31,9 +31,9 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(name="Cost", type="float")
+     * @ORM\Column(name="Price", type="float")
      */
-    private $cost;
+    private $price;
 
 
     /**
@@ -51,7 +51,7 @@ class Product
      *
      * @param string $name
      *
-     * @return Product
+     * @return Service
      */
     public function setName($name)
     {
@@ -71,27 +71,27 @@ class Product
     }
 
     /**
-     * Set cost
+     * Set price
      *
-     * @param float $cost
+     * @param float $price
      *
-     * @return Product
+     * @return Service
      */
-    public function setCost($cost)
+    public function setPrice($price)
     {
-        $this->cost = $cost;
+        $this->price = $price;
 
         return $this;
     }
 
     /**
-     * Get cost
+     * Get price
      *
      * @return float
      */
-    public function getCost()
+    public function getPrice()
     {
-        return $this->cost;
+        return $this->price;
     }
 }
 
