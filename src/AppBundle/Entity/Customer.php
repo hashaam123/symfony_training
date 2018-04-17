@@ -38,9 +38,9 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="Picture", type="string", length=255, nullable=true)
+     * @ORM\Column(name="Address", type="string", length=255, nullable=true)
      */
-    private $picture;
+    private $address;
 
     /**
      * Customer constructor.
@@ -85,27 +85,27 @@ class Customer
     }
 
     /**
-     * Set picture
+     * Set address
      *
-     * @param string $picture
+     * @param string $address
      *
      * @return Customer
      */
-    public function setPicture($picture)
+    public function setAddress($address)
     {
-        $this->picture = $picture;
+        $this->address = $address;
 
         return $this;
     }
 
     /**
-     * Get picture
+     * Get address
      *
      * @return string
      */
-    public function getPicture()
+    public function getAddress()
     {
-        return $this->picture;
+        return $this->address;
     }
 
     /**
@@ -120,7 +120,7 @@ class Customer
 
     public function __toString()
     {
-        return get_class($this);
+        return (string)$this->id;
     }
 }
 
