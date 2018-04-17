@@ -14,8 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Customer
 {
     /**
-     * @ORM\ManyToMany(targetEntity="Orders", inversedBy="customers")
-     * @ORM\JoinColumn(name="id", referencedColumnName="userId")
+     * @ORM\OneToMany(targetEntity="Orders", mappedBy="userIds")
+     * @ORM\JoinColumn(name="Id", referencedColumnName="userId")
      */
     private $orders;
 
@@ -106,6 +106,21 @@ class Customer
     public function getPicture()
     {
         return $this->picture;
+    }
+
+    /**
+     * Get orders
+     *
+     * @return ArrayCollection
+     */
+    public function getOrders()
+    {
+        return $this->orders;
+    }
+
+    public function __toString()
+    {
+        return get_class($this);
     }
 }
 

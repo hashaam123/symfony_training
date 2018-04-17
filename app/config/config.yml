@@ -77,3 +77,55 @@ swiftmailer:
 #            type: stream
 #            path: '%kernel.logs_dir%/customlogs.log'
 #            level: info
+
+easy_admin:
+    entities:
+        # change the following to the namespaces of your own entities
+        Product:
+            class:  AppBundle\Entity\Product
+        Customer:
+            class:  AppBundle\Entity\Customer
+            new:
+              fields:  ["name", "Picture"]
+            edit:
+              fields:  ["name", "Picture"]
+            list:
+              fields:  ["id", "name", "Picture"]
+            search:
+              fields:  ["id", "name", "Picture"]
+        Orders:
+            class:  AppBundle\Entity\Orders
+            new:
+                fields:
+                    - { property: 'userIds', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
+            list:
+                fields:
+                    - { property: 'id', label: 'Id' }
+                    - { property: 'userId', label: 'UserId' }
+                    - { property: 'name', label: 'Name' }
+                    - { property: 'cost', label: 'Cost' }
+                    - { property: 'isAccepted', label: 'Accepted' }
+
+        Service:
+            class:  AppBundle\Entity\Service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

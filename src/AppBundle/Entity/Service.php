@@ -18,13 +18,14 @@ class Service
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\ManyToMany(targetEntity="Orders", mappedBy="services")
      */
     private $id;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="Name", type="string", length=255)
+     * @ORM\Column(name="Name", type="string", length=255, unique=true)
      */
     private $name;
 
@@ -92,6 +93,11 @@ class Service
     public function getPrice()
     {
         return $this->price;
+    }
+
+    public function __toString()
+    {
+        return get_class($this);
     }
 }
 

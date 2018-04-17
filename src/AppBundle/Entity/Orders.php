@@ -14,9 +14,26 @@ use Doctrine\ORM\Mapping as ORM;
 class Orders
 {
     /**
-     * @ORM\ManyToMany(targetEntity="Customer", mappedBy="orders")
+     * @var string
+     *
+     * @ORM\ManyToMany(targetEntity="Service")
      */
-    private $customers;
+    private $services;
+
+    /**
+     * @var string
+     *
+     * @ORM\ManyToMany(targetEntity="Product")
+     */
+    private $products;
+
+    /**
+     * @var int
+     *
+     * @ORM\ManyToOne(targetEntity="Customer", inversedBy="orders")
+     * @ORM\JoinColumn(name="userId", referencedColumnName="id")
+     */
+    private $userIds;
 
     /**
      * @var int
@@ -28,8 +45,9 @@ class Orders
     private $id;
 
     /**
+     * @var int
      *
-     * @ORM\Column(name="UserId", type="integer")
+     * @ORM\Column(name="userId", type="integer")
      */
     private $userId;
 
@@ -56,7 +74,7 @@ class Orders
 
     public function __construct()
     {
-        $this->customers = new ArrayCollection();
+        $this->services = new ArrayCollection();
     }
 
     /**
@@ -163,6 +181,41 @@ class Orders
     public function getIsAccepted()
     {
         return $this->isAccepted;
+    }
+
+    public function __toString()
+    {
+        return get_class($this);
+    }
+
+    public function setServices($services)
+    {
+        $this->services = $services;
+    }
+
+    public function getServices()
+    {
+        return $this->services;
+    }
+
+    public function setPRoducts($products)
+    {
+        $this->products = $products;
+    }
+
+    public function getProducts()
+    {
+        return $this->products;
+    }
+
+    public function setUserIds($refferedUserId)
+    {
+        $this->userIds = $refferedUserId;
+    }
+
+    public function getUserIds()
+    {
+        return $this->userIds;
     }
 }
 
