@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Customer
 {
     /**
-     * @ORM\OneToMany(targetEntity="Orders", mappedBy="userIds")
+     * @ORM\OneToMany(targetEntity="Orders", mappedBy="user")
      * @ORM\JoinColumn(name="Id", referencedColumnName="userId")
      */
     private $orders;

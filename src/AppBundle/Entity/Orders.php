@@ -33,7 +33,7 @@ class Orders
      * @ORM\ManyToOne(targetEntity="Customer", inversedBy="orders")
      * @ORM\JoinColumn(name="userId", referencedColumnName="id")
      */
-    private $userIds;
+    private $user;
 
     /**
      * @var int
@@ -208,14 +208,24 @@ class Orders
         return $this->products;
     }
 
-    public function setUserIds($refferedUserId)
+    /**
+     * Set user
+     *
+     * @param $user
+     */
+    public function setUser($user)
     {
-        $this->userIds = $refferedUserId;
+        $this->user = $user;
     }
 
-    public function getUserIds()
+    /**
+     * Get user
+     *
+     * @return User
+     */
+    public function getUser()
     {
-        return $this->userIds;
+        return $this->user;
     }
 }
 

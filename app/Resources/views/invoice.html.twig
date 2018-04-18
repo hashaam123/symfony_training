@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        table tr td {
+            padding: 10px;
+        }
+        #invoice {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div id="invoice">
+    <h4>{{ order.getUser().getId() }}:{{ order.getUser().getName() }}</h4>
+    <table>
+        <tr>
+            <th>Services</th>
+            <th>Cost</th>
+        </tr>
+        {% for service in order.getServices() %}
+            <tr>
+                <td>{{ service }}</td>
+                <td>{{ service.getPrice() }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <th>Products</th>
+            <th>----</th>
+        </tr>
+        {% for product in order.getProducts() %}
+            <tr>
+                <td>{{ product.getName() }}</td>
+                <td>{{ product.getCost() }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <th>Total</th>
+            <th>{{ order.getCost() }}</th>
+        </tr>
+    </table>
+</div>
+<br />
+<button onclick="printInvoice()">Print</button>
+<script>
+    function printInvoice() {
+        printContents = document.getElementById("invoice").innerHTML;
+        origionalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = origionalContents
+    }
+</script>
+</body>
+</html>

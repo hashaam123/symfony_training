@@ -83,25 +83,27 @@ easy_admin:
         # change the following to the namespaces of your own entities
         Product:
             class:  AppBundle\Entity\Product
+            list:
+                actions: ["edit", "delete", "show"]
         Customer:
             class:  AppBundle\Entity\Customer
             new:
-              fields:  ["name", "address"]
+                fields:  ["name", "address"]
             edit:
-              fields:  ["name", "address"]
+                fields:  ["name", "address"]
             list:
-              fields:  ["id", "name", "address"]
-            search:
-              fields:  ["id", "name", "address"]
+                actions: ["edit", "delete", "show"]
+                fields:  ["id", "name", "address"]
         Orders:
             class:  AppBundle\Entity\Orders
             form:
                 fields:
-                    - { property: 'userIds', label: 'UserId' }
+                    - { property: 'user', label: 'UserId' }
                     - { property: 'name', label: 'OrderName' }
                     - { property: 'services', label: 'Services' }
                     - { property: 'products', label: 'Products' }
             list:
+                actions: ["edit", "delete", "show", "invoice"]
                 fields:
                     - { property: 'id', label: 'Id' }
                     - { property: 'userId', label: 'UserId'}
@@ -111,15 +113,30 @@ easy_admin:
 
         Service:
             class:  AppBundle\Entity\Service
+            list:
+                actions: ["edit", "delete", "show"]
         PendingOrder:
             class:  AppBundle\Entity\Orders
             list:
                 dql_filter: 'entity.isAccepted = false'
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'user', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
         AcceptedOrder:
             class:  AppBundle\Entity\Orders
             list:
                 dql_filter: 'entity.isAccepted = true'
-
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'user', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
 
 
 
