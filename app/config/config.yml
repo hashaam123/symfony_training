@@ -83,6 +83,7 @@ swiftmailer:
 #            level: info
 
 easy_admin:
+    site_name: '%app_name%'
     entities:
         # change the following to the namespaces of your own entities
         Product:

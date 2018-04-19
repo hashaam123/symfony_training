@@ -16,11 +16,11 @@ class EventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            'easy_admin.pre_list' => array('setBlogPostSlug'),
+            'easy_admin.pre_update' => array('preUpdate'),
         );
     }
 
-    public function setBlogPostSlug(GenericEvent $event)
+    public function preUpdate(GenericEvent $event)
     {
     }
 }

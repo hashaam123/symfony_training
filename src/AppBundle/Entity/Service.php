@@ -124,6 +124,9 @@ class Service
         return $this->dateTime;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->name;

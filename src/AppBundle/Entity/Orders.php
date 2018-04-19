@@ -213,26 +213,49 @@ class Orders
         return $this->dateTime;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return get_class($this);
     }
 
+    /**
+     * Set services
+     *
+     * @param $services
+     */
     public function setServices($services)
     {
         $this->services = $services;
     }
 
+    /**
+     * Get services
+     *
+     * @return ArrayCollection|string
+     */
     public function getServices()
     {
         return $this->services;
     }
 
-    public function setPRoducts($products)
+    /**
+     * Set products
+     *
+     * @param $products
+     */
+    public function setProducts($products)
     {
         $this->products = $products;
     }
 
+    /**
+     * Get products
+     *
+     * @return Product products
+     */
     public function getProducts()
     {
         return $this->products;
