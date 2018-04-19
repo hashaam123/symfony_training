@@ -59,6 +59,10 @@ doctrine:
         #path: '%database_path%'
 
     orm:
+        dql:
+            string_functions:
+                MONTH: DoctrineExtensions\Query\Mysql\Month
+                YEAR: DoctrineExtensions\Query\Mysql\Year
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
@@ -85,15 +89,18 @@ easy_admin:
             class:  AppBundle\Entity\Product
             list:
                 actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'name', label: 'Name' }
+                    - { property: 'cost', label: 'Cost' }
+
         Customer:
             class:  AppBundle\Entity\Customer
-            new:
-                fields:  ["name", "address"]
-            edit:
+            form:
                 fields:  ["name", "address"]
             list:
                 actions: ["edit", "delete", "show"]
-                fields:  ["id", "name", "address"]
+                fields:  ["id", "name", "address", "dateTime"]
         Orders:
             class:  AppBundle\Entity\Orders
             form:
@@ -110,11 +117,15 @@ easy_admin:
                     - { property: 'name', label: 'Name' }
                     - { property: 'cost', label: 'Cost' }
                     - { property: 'isAccepted', label: 'Accepted' }
-
+                    - { property: 'dateTime', label: 'Date Time' }
         Service:
             class:  AppBundle\Entity\Service
             list:
                 actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'name', label: 'Name' }
+                    - { property: 'price', label: 'Price' }
         PendingOrder:
             class:  AppBundle\Entity\Orders
             list:
@@ -137,7 +148,12 @@ easy_admin:
                     - { property: 'name', label: 'OrderName' }
                     - { property: 'services', label: 'Services' }
                     - { property: 'products', label: 'Products' }
-
+        Sales:
+            class:  AppBundle\Entity\Orders
+            disabled_actions: ['delete', "edit", "new"]
+            list:
+                fields:
+                    - { property: 'cost', label: 'Cost' }
 
 
 

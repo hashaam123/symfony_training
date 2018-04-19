@@ -9,17 +9,18 @@ use AppBundle\Entity\Service;
 use AppBundle\Entity\Orders;
 use AppBundle\Entity\Customer;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class EventSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            'easy_admin.pre_delete' => array('setOrderCost'),
+            'easy_admin.pre_list' => array('setBlogPostSlug'),
         );
     }
 
-    public function setOrderCost()
+    public function setBlogPostSlug(GenericEvent $event)
     {
     }
 }

@@ -41,7 +41,13 @@
     </table>
 </div>
 <br />
-<button onclick="printInvoice()">Print</button>
+{% if (order.isAccepted()) %}
+    <button disabled onclick="printInvoice()">Print</button>
+    <p>Done</p>
+{% else %}
+    <button onclick="printInvoice()">Print</button>
+    <p>Pending</p>
+{% endif %}
 <script>
     function printInvoice() {
         printContents = document.getElementById("invoice").innerHTML;

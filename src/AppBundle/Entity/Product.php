@@ -36,6 +36,12 @@ class Product
      */
     private $cost;
 
+    /**
+     * @var datetime
+     *
+     * @ORM\Column(name="DateTime", type="datetime")
+     */
+    private $dateTime;
 
     /**
      * Get id
@@ -93,6 +99,29 @@ class Product
     public function getCost()
     {
         return $this->cost;
+    }
+
+    /**
+     * Set dateTime
+     *
+     * @param \DateTime $dateTime
+     *
+     * @return Product
+     */
+    public function setDateTime(\DateTime $dateTime)
+    {
+        $this->dateTime = $dateTime;
+        return $this;
+    }
+
+    /**
+     * Get dateTime
+     *
+     * @return \DateTime $dateTime
+     */
+    public function getDateTime()
+    {
+        return $this->dateTime;
     }
 
     public function __toString()

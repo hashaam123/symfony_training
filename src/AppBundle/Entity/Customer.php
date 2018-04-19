@@ -43,6 +43,13 @@ class Customer
     private $address;
 
     /**
+     * @var datetime
+     *
+     * @ORM\Column(name="DateTime", type="datetime")
+     */
+    private $dateTime;
+
+    /**
      * Customer constructor.
      */
     public function __construct()
@@ -116,6 +123,29 @@ class Customer
     public function getOrders()
     {
         return $this->orders;
+    }
+
+    /**
+     * Set dateTime
+     *
+     * @param \DateTime $dateTime
+     *
+     * @return Customer
+     */
+    public function setDateTime(\DateTime $dateTime)
+    {
+        $this->dateTime = $dateTime;
+        return $this;
+    }
+
+    /**
+     * Get dateTime
+     *
+     * @return \DateTime $dateTime
+     */
+    public function getDateTime()
+    {
+        return $this->dateTime;
     }
 
     public function __toString()
