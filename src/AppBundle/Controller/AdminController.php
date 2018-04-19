@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Orders;
+use AppBundle\Entity\Sales;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AdminController as BaseAdminController;
 use AppBundle\Entity\Service;
 use EasyCorp\Bundle\EasyAdminBundle\Event\EasyAdminEvents;
@@ -11,11 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminController extends BaseAdminController
 {
-    protected function preListEntity($entity)
-    {
-        file_put_contents("/home/coeus/Desktop/file.txt", "sadf");
-    }
-
     protected function prePersistEntity($entity)
     {
         $entity->setDateTime(new \DateTime());
@@ -54,6 +50,14 @@ class AdminController extends BaseAdminController
             if($entity->getIsAccepted() == null) {
                 $entity->setIsAccepted(false);
             }
+            if ($entity->getIsAccepted() == true) {
+                $sales = new Sales();
+                $sales->setOrderId($entity->getId());
+                $sales->setCost($entity->getCost());
+                $sales->setDateTime($entity->getDateTime());
+                $this->em->persist($sales);
+                $this->em->flush();
+            }
         }
     }
 
@@ -64,18 +68,25 @@ class AdminController extends BaseAdminController
         return $this->render("invoice.html.twig", [ "order" => $order ] );
     }
 
-    public function createListQueryBuilder($entityClass, $sortDirection, $sortField = null, $dqlFilter = null)
+    protected function listAction()
     {
-        if ($entityClass == "AppBundle\Entity\Orders") {
-            $query = $this->em->createQuery(
-                'SELECT year(p.dateTime), sum(p.cost)
-                FROM AppBundle:Orders p
-                WHERE p.isAccepted = true
-                group by year(p.dateTime)');
-            return $query;
-
+        if ($this->entity['class'] == "AppBundle\Entity\Sales") {
+            $sales = $this->em->getRepository(Sales::class)->findAll();
+            $str = "";
+            $profits =[];
+            foreach ($sales as $sale) {
+                $sale->setDateTime($sale->getDateTime()->format("y"));
+                if (isset($profits[$sale->getDateTime()])) {
+                    $profits[$sale->getDateTime()][1] += $sale->getCost();
+                } else {
+                    $profits[$sale->getDateTime()] = [$sale->getDateTime(), $sale->getCost()];
+                }
+                $str .= $sale->getId();
+            }
+            $fields = ["Year", "Sale"];
+            return $this->render("sales.html.twig", array("sales" => $profits, "fields" => $fields));
         } else {
-            return parent::createListQueryBuilder($entityClass, $sortDirection, $sortField, $dqlFilter);
+            return parent::listAction();
         }
     }
 }

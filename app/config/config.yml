@@ -111,13 +111,6 @@ easy_admin:
                     - { property: 'products', label: 'Products' }
             list:
                 actions: ["edit", "delete", "show", "invoice"]
-                fields:
-                    - { property: 'id', label: 'Id' }
-                    - { property: 'userId', label: 'UserId'}
-                    - { property: 'name', label: 'Name' }
-                    - { property: 'cost', label: 'Cost' }
-                    - { property: 'isAccepted', label: 'Accepted' }
-                    - { property: 'dateTime', label: 'Date Time' }
         Service:
             class:  AppBundle\Entity\Service
             list:
@@ -149,12 +142,8 @@ easy_admin:
                     - { property: 'services', label: 'Services' }
                     - { property: 'products', label: 'Products' }
         Sales:
-            class:  AppBundle\Entity\Orders
+            class:  AppBundle\Entity\Sales
             disabled_actions: ['delete', "edit", "new"]
-            list:
-                fields:
-                    - { property: 'cost', label: 'Cost' }
-
 
 
 
