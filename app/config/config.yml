@@ -13,7 +13,7 @@ framework:
     #esi: ~
     translator:
         paths:
-            - '%kernel.project_dir%/app/Resources/translations'
+#            - '%kernel.project_dir%/app/Resources/translations'
     secret: '%secret%'
     router:
         resource: '%kernel.project_dir%/app/config/routing.yml'
@@ -59,6 +59,10 @@ doctrine:
         #path: '%database_path%'
 
     orm:
+        dql:
+            string_functions:
+                MONTH: DoctrineExtensions\Query\Mysql\Month
+                YEAR: DoctrineExtensions\Query\Mysql\Year
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
@@ -71,10 +75,85 @@ swiftmailer:
     password: '%mailer_password%'
     spool: { type: memory }
 
-monolog:
-    handlers:
-        main:
-            type: stream
-            path: '%kernel.logs_dir%/customlogs.log'
-            level: info
-            channels: ['productservice', 'userservice']
+#monolog:
+#    handlers:
+#        main:
+#            type: stream
+#            path: '%kernel.logs_dir%/customlogs.log'
+#            level: info
+
+easy_admin:
+    site_name: '%app_name%'
+    entities:
+        # change the following to the namespaces of your own entities
+        Product:
+            class:  AppBundle\Entity\Product
+            list:
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'name', label: 'Name' }
+                    - { property: 'cost', label: 'Cost' }
+
+        Customer:
+            class:  AppBundle\Entity\Customer
+            form:
+                fields:  ["name", "address"]
+            list:
+                actions: ["edit", "delete", "show"]
+                fields:  ["id", "name", "address", "dateTime"]
+        Orders:
+            class:  AppBundle\Entity\Orders
+            form:
+                fields:
+                    - { property: 'user', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
+            list:
+                actions: ["edit", "delete", "show", "invoice"]
+        Service:
+            class:  AppBundle\Entity\Service
+            list:
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'name', label: 'Name' }
+                    - { property: 'price', label: 'Price' }
+        PendingOrder:
+            class:  AppBundle\Entity\Orders
+            list:
+                dql_filter: 'entity.isAccepted = false'
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'user', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
+        AcceptedOrder:
+            class:  AppBundle\Entity\Orders
+            list:
+                dql_filter: 'entity.isAccepted = true'
+                actions: ["edit", "delete", "show"]
+            form:
+                fields:
+                    - { property: 'user', label: 'UserId' }
+                    - { property: 'name', label: 'OrderName' }
+                    - { property: 'services', label: 'Services' }
+                    - { property: 'products', label: 'Products' }
+        Sales:
+            class:  AppBundle\Entity\Sales
+            disabled_actions: ['delete', "edit", "new"]
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,23 +2,29 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Product
+ * Customer
  *
- * @ORM\Table(name="product")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
+ * @ORM\Table(name="customer")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\CustomerRepository")
  */
-class Product
+class Customer
 {
+    /**
+     * @ORM\OneToMany(targetEntity="Orders", mappedBy="user")
+     * @ORM\JoinColumn(name="Id", referencedColumnName="userId")
+     */
+    private $orders;
+
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\ManyToMany(targetEntity="Orders", mappedBy="products")
      */
     private $id;
 
@@ -30,11 +36,11 @@ class Product
     private $name;
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="Cost", type="float")
+     * @ORM\Column(name="Address", type="string", length=255, nullable=true)
      */
-    private $cost;
+    private $address;
 
     /**
      * @var datetime
@@ -42,6 +48,14 @@ class Product
      * @ORM\Column(name="DateTime", type="datetime")
      */
     private $dateTime;
+
+    /**
+     * Customer constructor.
+     */
+    public function __construct()
+    {
+        $this->orders = new ArrayCollection();
+    }
 
     /**
      * Get id
@@ -58,7 +72,7 @@ class Product
      *
      * @param string $name
      *
-     * @return Product
+     * @return Customer
      */
     public function setName($name)
     {
@@ -78,27 +92,37 @@ class Product
     }
 
     /**
-     * Set cost
+     * Set address
      *
-     * @param float $cost
+     * @param string $address
      *
-     * @return Product
+     * @return Customer
      */
-    public function setCost($cost)
+    public function setAddress($address)
     {
-        $this->cost = $cost;
+        $this->address = $address;
 
         return $this;
     }
 
     /**
-     * Get cost
+     * Get address
      *
-     * @return float
+     * @return string
      */
-    public function getCost()
+    public function getAddress()
     {
-        return $this->cost;
+        return $this->address;
+    }
+
+    /**
+     * Get orders
+     *
+     * @return ArrayCollection
+     */
+    public function getOrders()
+    {
+        return $this->orders;
     }
 
     /**
@@ -106,7 +130,7 @@ class Product
      *
      * @param \DateTime $dateTime
      *
-     * @return Product
+     * @return Customer
      */
     public function setDateTime(\DateTime $dateTime)
     {
@@ -129,7 +153,7 @@ class Product
      */
     public function __toString()
     {
-        return $this->name;
+        return (string)$this->id;
     }
 }
 
